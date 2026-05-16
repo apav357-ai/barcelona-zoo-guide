@@ -12,9 +12,39 @@ import { ANIMALS, type Animal, type Language, getAnimalName } from "@/data/anima
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-// Zoo center — always start here
 const ZOO_CENTER: [number, number] = [41.387, 2.189];
 const ZOO_DEFAULT_ZOOM = 17;
+
+// ─── Pulsing user location icon ───────────────────────────────────────────────
+
+const USER_LOCATION_ICON = L.divIcon({
+  className: "",
+  html: `
+    <div style="position:relative;width:22px;height:22px;">
+      <div style="
+        position:absolute;inset:-8px;border-radius:50%;
+        background:rgba(59,130,246,0.25);
+        animation:userPulse 2s ease-out infinite;
+      "></div>
+      <div style="
+        position:absolute;inset:-2px;border-radius:50%;
+        background:white;box-shadow:0 2px 8px rgba(0,0,0,0.35);
+      "></div>
+      <div style="
+        position:absolute;inset:0;border-radius:50%;
+        background:#3b82f6;
+      "></div>
+    </div>
+    <style>
+      @keyframes userPulse{
+        0%{transform:scale(1);opacity:.7}
+        100%{transform:scale(3);opacity:0}
+      }
+    </style>
+  `,
+  iconSize: [22, 22],
+  iconAnchor: [11, 11],
+});
 
 // ─── Language config ──────────────────────────────────────────────────────────
 
@@ -98,7 +128,6 @@ const ZooMap = () => {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
   const [routeInfo, setRouteInfo]       = useState<{ animal: Animal } | null>(null);
-  // ✅ Always start with satellite
   const [mapLayer, setMapLayer]         = useState<MapLayer>("satellite");
   const [osmCached, setOsmCached]       = useState(false);
   const [caching, setCaching]           = useState(false);
@@ -114,13 +143,10 @@ const ZooMap = () => {
   const t = UI_TEXTS[language];
   const currentLang = LANGUAGES.find((l) => l.code === language)!;
 
-  // Check if OSM already cached
   useEffect(() => {
-    if ("caches" in window)
-      caches.has(OSM_CACHE_NAME).then(setOsmCached);
+    if ("caches" in window) caches.has(OSM_CACHE_NAME).then(setOsmCached);
   }, []);
 
-  // Close lang menu on outside click
   useEffect(() => {
     const h = (e: MouseEvent) => {
       if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node))
@@ -130,7 +156,6 @@ const ZooMap = () => {
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  // Swap tile layers when mapLayer changes
   useEffect(() => {
     const map = mapRef.current;
     const sat = satelliteLayerRef.current;
@@ -158,7 +183,8 @@ const ZooMap = () => {
         const { latitude: lat, longitude: lng } = pos.coords;
         if (!mapRef.current) return;
         if (userMarkerRef.current) mapRef.current.removeLayer(userMarkerRef.current);
-        userMarkerRef.current = L.marker([lat, lng]).addTo(mapRef.current);
+        // ✅ Пульсуючий синій dot замість стандартного маркера
+        userMarkerRef.current = L.marker([lat, lng], { icon: USER_LOCATION_ICON }).addTo(mapRef.current);
         mapRef.current.setView([lat, lng], 18);
       },
       (err) => {
@@ -190,7 +216,6 @@ const ZooMap = () => {
     );
   }, [clearRoute, t, language]);
 
-  // Toggle layer + trigger precache on first OSM switch
   const handleLayerToggle = useCallback(async () => {
     const next: MapLayer = mapLayer === "satellite" ? "osm" : "satellite";
     setMapLayer(next);
@@ -204,7 +229,6 @@ const ZooMap = () => {
     }
   }, [mapLayer, osmCached, caching, t]);
 
-  // ✅ Init map — always satellite, always zoo center
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
@@ -212,27 +236,21 @@ const ZooMap = () => {
       center: ZOO_CENTER,
       zoom: ZOO_DEFAULT_ZOOM,
       zoomControl: false,
-      // Prevent Leaflet from restoring last scroll position
       preferCanvas: false,
     });
     mapRef.current = map;
 
-    // ✅ Satellite added immediately — this is always the starting layer
     satelliteLayerRef.current = L.tileLayer(
       "https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
       { subdomains: ["mt0", "mt1", "mt2", "mt3"], maxZoom: 21, attribution: "© Google" }
     ).addTo(map);
 
-    // OSM — initialised but NOT added to map
     osmLayerRef.current = L.tileLayer(
       "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       { maxZoom: 19, attribution: "© OpenStreetMap contributors" }
     );
 
-    // ✅ Always reset to satellite state
     setMapLayer("satellite");
-
-    // ✅ Always fly back to zoo center on init
     map.setView(ZOO_CENTER, ZOO_DEFAULT_ZOOM);
 
     const cluster = L.markerClusterGroup();
@@ -259,8 +277,6 @@ const ZooMap = () => {
           onSelect={(a) => { setSelectedAnimal(a); mapRef.current?.setView([a.lat, a.lng], 18); }}
           language={language}
         />
-
-        {/* Language dropdown */}
         <div ref={langMenuRef} className="relative shrink-0">
           <button
             onClick={() => setLangMenuOpen((v) => !v)}
@@ -292,38 +308,25 @@ const ZooMap = () => {
         className="absolute z-[1000] flex flex-col items-center gap-2"
         style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)", right: "16px" }}
       >
-        <button
-          onClick={() => mapRef.current?.zoomIn()}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-md text-gray-700 transition-transform active:scale-90"
-        >
+        <button onClick={() => mapRef.current?.zoomIn()}
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-md text-gray-700 transition-transform active:scale-90">
           <Plus size={20} strokeWidth={2.5} />
         </button>
-
-        <button
-          onClick={showUserLocation}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-xl transition-transform active:scale-90"
-        >
+        <button onClick={showUserLocation}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-xl transition-transform active:scale-90">
           <LocateFixed size={26} />
         </button>
-
-        <button
-          onClick={() => mapRef.current?.zoomOut()}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-md text-gray-700 transition-transform active:scale-90"
-        >
+        <button onClick={() => mapRef.current?.zoomOut()}
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-md text-gray-700 transition-transform active:scale-90">
           <Minus size={20} strokeWidth={2.5} />
         </button>
-
-        {/* Layer toggle */}
         <button
           onClick={handleLayerToggle}
           disabled={caching}
           title={mapLayer === "satellite" ? t.mapView : t.satellite}
           className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-md text-gray-700 transition-transform active:scale-90 disabled:opacity-50"
         >
-          {mapLayer === "satellite"
-            ? <Map size={20} strokeWidth={2} />
-            : <Satellite size={20} strokeWidth={2} />
-          }
+          {mapLayer === "satellite" ? <Map size={20} strokeWidth={2} /> : <Satellite size={20} strokeWidth={2} />}
         </button>
       </div>
 
