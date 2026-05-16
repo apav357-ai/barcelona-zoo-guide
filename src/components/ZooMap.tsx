@@ -13,8 +13,13 @@ import { ANIMALS, type Animal, type Language, getAnimalName } from "@/data/anima
 const ZOO_CENTER: [number, number] = [41.387, 2.189];
 const ZOO_DEFAULT_ZOOM = 17;
 
+// ─── Barcelona bounds — карта не вийде за ці межі ────────────────────────────
+const BARCELONA_BOUNDS: L.LatLngBoundsExpression = [
+  [41.32, 2.08], // SW
+  [41.47, 2.29], // NE
+];
+
 // ─── User location dot marker ─────────────────────────────────────────────────
-// className="user-location-dot" strips Leaflet's white bg (defined in index.css)
 
 const USER_LOCATION_ICON = L.divIcon({
   className: "user-location-dot",
@@ -155,7 +160,11 @@ const ZooMap = () => {
         if (!mapRef.current) return;
         if (userMarkerRef.current) mapRef.current.removeLayer(userMarkerRef.current);
         userMarkerRef.current = L.marker([lat, lng], { icon: USER_LOCATION_ICON }).addTo(mapRef.current);
-        mapRef.current.setView([lat, lng], 18);
+        // ✅ Центруємо тільки якщо користувач в межах Барселони
+        const bounds = L.latLngBounds(BARCELONA_BOUNDS);
+        if (bounds.contains([lat, lng])) {
+          mapRef.current.setView([lat, lng], 18);
+        }
       },
       (err) => {
         if (err.code === err.PERMISSION_DENIED) toast.error(t.geoDenied);
@@ -202,7 +211,14 @@ const ZooMap = () => {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     const map = L.map(containerRef.current, {
-      center: ZOO_CENTER, zoom: ZOO_DEFAULT_ZOOM, zoomControl: false, preferCanvas: false,
+      center: ZOO_CENTER,
+      zoom: ZOO_DEFAULT_ZOOM,
+      zoomControl: false,
+      preferCanvas: false,
+      // ✅ Карта не виходить за межі Барселони
+      maxBounds: BARCELONA_BOUNDS,
+      maxBoundsViscosity: 1.0, // тверда межа
+      minZoom: 13,             // не можна відзумити далі Барселони
     });
     mapRef.current = map;
 
