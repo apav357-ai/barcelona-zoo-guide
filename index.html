@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Barcelona Zoo Guide</title>
+    <meta name="description" content="Interactive guide to Barcelona Zoo: 78 species, search, and navigation." />
+    <meta name="author" content="Barcelona Zoo Guide" />
+
+    <!-- PWA / Theme -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png" />
+    <link rel="shortcut icon" href="/icons/icon-32.png" />
+
+    <!-- iOS standalone -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Zoo Guide" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png" />
+
+    <meta property="og:title" content="Barcelona Zoo Guide" />
+    <meta property="og:description" content="Interactive guide to Barcelona Zoo: 78 species, search, and navigation." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+  </head>
+
+  <body>
+    <style>
+      #app-splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#ffffff;z-index:9999;transition:opacity .35s ease}
+      #app-splash.hide{opacity:0;pointer-events:none}
+      #app-splash img{width:50vmin;max-width:280px;height:auto;animation:splashPulse 1.6s ease-in-out infinite}
+      @keyframes splashPulse{0%,100%{transform:scale(1);opacity:.95}50%{transform:scale(1.05);opacity:1}}
+      @media (prefers-color-scheme: dark){#app-splash{background:#0b1220}}
+    </style>
+    <div id="app-splash"><img src="/icons/icon-512.png" alt="" /></div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.addEventListener('load', function(){
+        setTimeout(function(){
+          var s = document.getElementById('app-splash');
+          if (s){ s.classList.add('hide'); setTimeout(function(){ s.remove(); }, 400); }
+        }, 250);
+      });
+    </script>
+  </body>
+</html>

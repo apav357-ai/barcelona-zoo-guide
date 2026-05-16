@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.barcelonazoo.guide",
+      "sha256_cert_fingerprints": [
+        "54:71:FC:58:D4:A6:53:D6:20:65:46:4C:8B:13:AF:8C:1E:9D:16:DA:11:B5:11:E4:F6:1E:8E:0B:79:C5:EC:E9"
+      ]
+    }
+  }
+]
