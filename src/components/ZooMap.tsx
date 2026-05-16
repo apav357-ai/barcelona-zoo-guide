@@ -10,40 +10,22 @@ import AnimalCard from "./AnimalCard";
 import AnimalSearch from "./AnimalSearch";
 import { ANIMALS, type Animal, type Language, getAnimalName } from "@/data/animals";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const ZOO_CENTER: [number, number] = [41.387, 2.189];
 const ZOO_DEFAULT_ZOOM = 17;
 
-// ─── Pulsing user location icon ───────────────────────────────────────────────
+// ─── Pin marker for user location ─────────────────────────────────────────────
 
 const USER_LOCATION_ICON = L.divIcon({
   className: "",
   html: `
-    <div style="position:relative;width:22px;height:22px;">
-      <div style="
-        position:absolute;inset:-8px;border-radius:50%;
-        background:rgba(59,130,246,0.25);
-        animation:userPulse 2s ease-out infinite;
-      "></div>
-      <div style="
-        position:absolute;inset:-2px;border-radius:50%;
-        background:white;box-shadow:0 2px 8px rgba(0,0,0,0.35);
-      "></div>
-      <div style="
-        position:absolute;inset:0;border-radius:50%;
-        background:#3b82f6;
-      "></div>
-    </div>
-    <style>
-      @keyframes userPulse{
-        0%{transform:scale(1);opacity:.7}
-        100%{transform:scale(3);opacity:0}
-      }
-    </style>
+    <svg width="28" height="40" viewBox="0 0 28 40" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 26 14 26S28 24.5 28 14C28 6.27 21.73 0 14 0z"
+        fill="#3b82f6" stroke="white" stroke-width="2"/>
+      <circle cx="14" cy="14" r="5" fill="white"/>
+    </svg>
   `,
-  iconSize: [22, 22],
-  iconAnchor: [11, 11],
+  iconSize: [28, 40],
+  iconAnchor: [14, 40],
 });
 
 // ─── Language config ──────────────────────────────────────────────────────────
@@ -68,15 +50,11 @@ const UI_TEXTS: Record<Language, {
   pl: { locating: "Szukamy cię...",     routeTo: "Trasa do",   stop: "Stop",  direct: "Prosta trasa",   geoError: "Nie można pobrać lokalizacji", geoTimeout: "Limit czasu GPS — spróbuj ponownie", geoDenied: "Odmowa dostępu do lokalizacji", satellite: "Satelita", mapView: "Mapa",  caching: "Zapisywanie mapy...",   cached: "Mapa zapisana ✓" },
 };
 
-// ─── Geolocation options ──────────────────────────────────────────────────────
-
 const GEO_OPTIONS: PositionOptions = {
   enableHighAccuracy: true,
   timeout: 10000,
   maximumAge: 0,
 };
-
-// ─── OSM offline precache ─────────────────────────────────────────────────────
 
 const ZOO_BOUNDS = { minLat: 41.383, maxLat: 41.392, minLng: 2.184, maxLng: 2.195 };
 const OSM_CACHE_NAME = "osm-zoo-tiles-v1";
@@ -118,8 +96,6 @@ async function precacheOSMTiles(onProgress?: (pct: number) => void) {
     onProgress?.(Math.round(done / allTiles.length * 100));
   }
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 type MapLayer = "satellite" | "osm";
 
@@ -183,7 +159,6 @@ const ZooMap = () => {
         const { latitude: lat, longitude: lng } = pos.coords;
         if (!mapRef.current) return;
         if (userMarkerRef.current) mapRef.current.removeLayer(userMarkerRef.current);
-        // ✅ Пульсуючий синій dot замість стандартного маркера
         userMarkerRef.current = L.marker([lat, lng], { icon: USER_LOCATION_ICON }).addTo(mapRef.current);
         mapRef.current.setView([lat, lng], 18);
       },
@@ -231,12 +206,8 @@ const ZooMap = () => {
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-
     const map = L.map(containerRef.current, {
-      center: ZOO_CENTER,
-      zoom: ZOO_DEFAULT_ZOOM,
-      zoomControl: false,
-      preferCanvas: false,
+      center: ZOO_CENTER, zoom: ZOO_DEFAULT_ZOOM, zoomControl: false, preferCanvas: false,
     });
     mapRef.current = map;
 
@@ -271,7 +242,6 @@ const ZooMap = () => {
     <div className="absolute inset-0 overflow-hidden">
       <div ref={containerRef} className="absolute inset-0" />
 
-      {/* Top bar */}
       <div className="absolute top-4 left-0 right-0 z-[1000] flex gap-2 px-4">
         <AnimalSearch
           onSelect={(a) => { setSelectedAnimal(a); mapRef.current?.setView([a.lat, a.lng], 18); }}
@@ -303,7 +273,6 @@ const ZooMap = () => {
         </div>
       </div>
 
-      {/* Controls — bottom right */}
       <div
         className="absolute z-[1000] flex flex-col items-center gap-2"
         style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)", right: "16px" }}
@@ -323,14 +292,12 @@ const ZooMap = () => {
         <button
           onClick={handleLayerToggle}
           disabled={caching}
-          title={mapLayer === "satellite" ? t.mapView : t.satellite}
           className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-md text-gray-700 transition-transform active:scale-90 disabled:opacity-50"
         >
           {mapLayer === "satellite" ? <Map size={20} strokeWidth={2} /> : <Satellite size={20} strokeWidth={2} />}
         </button>
       </div>
 
-      {/* Route banner */}
       {routeInfo && (
         <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-xs bg-white p-3 rounded-2xl shadow-2xl flex items-center gap-3">
           <span className="text-2xl">{routeInfo.animal.emoji}</span>
