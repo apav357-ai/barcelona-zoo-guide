@@ -13,29 +13,14 @@ import { ANIMALS, type Animal, type Language, getAnimalName } from "@/data/anima
 const ZOO_CENTER: [number, number] = [41.387, 2.189];
 const ZOO_DEFAULT_ZOOM = 17;
 
-// ─── Pin marker — inject global style once to kill Leaflet's white bg ─────────
-
-const PIN_STYLE = `
-  .user-pin-icon {
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-`;
-if (typeof document !== "undefined" && !document.getElementById("user-pin-style")) {
-  const s = document.createElement("style");
-  s.id = "user-pin-style";
-  s.textContent = PIN_STYLE;
-  document.head.appendChild(s);
-}
+// ─── User location dot marker ─────────────────────────────────────────────────
+// className="user-location-dot" strips Leaflet's white bg (defined in index.css)
 
 const USER_LOCATION_ICON = L.divIcon({
-  className: "user-pin-icon",
-  html: `<svg width="28" height="40" viewBox="0 0 28 40" xmlns="http://www.w3.org/2000/svg" style="display:block"><path d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 26 14 26S28 24.5 28 14C28 6.27 21.73 0 14 0z" fill="#3b82f6" stroke="white" stroke-width="2"/><circle cx="14" cy="14" r="5" fill="white"/></svg>`,
-  iconSize: [28, 40],
-  iconAnchor: [14, 40],
+  className: "user-location-dot",
+  html: `<div style="width:20px;height:20px;border-radius:50%;background:#2563eb;border:3px solid white;box-shadow:0 0 0 2px #2563eb,0 2px 8px rgba(0,0,0,0.3);"></div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
 });
 
 // ─── Language config ──────────────────────────────────────────────────────────

@@ -130,4 +130,11 @@ All colors MUST be HSL.
   z-index: 2000 !important;
 }
 
-
+/* ── User location dot — kills Leaflet's default white background ── */
+.user-location-dot {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
