@@ -39,7 +39,7 @@ const UI_TEXTS: Record<Language, {
   satellite: string; mapView: string; caching: string; cached: string;
 }> = {
   en: { locating: "Locating...",        routeTo: "Route to",   stop: "Stop",  direct: "Direct path",    geoError: "Could not get location",      geoTimeout: "GPS timeout — try again",        geoDenied: "Location access denied",      satellite: "Satellite", mapView: "Map",   caching: "Saving map offline...", cached: "Map saved offline ✓" },
-  ua: { locating: "Шукаємо вас...",     routeTo: "Маршрут до", stop: "Стоп",  direct: "Пнямий шлях",    geoError: "Не вдалось визначити місце",   geoTimeout: "GPS не відповів — спробуйте",    geoDenied: "Доступ до локації заборонено", satellite: "Супутник",  mapView: "Карта", caching: "Зберігаємо карту...",   cached: "Карту збережено ✓" },
+  ua: { locating: "Шукаємо вас...",     routeTo: "Маршрут до", stop: "Стоп",  direct: "Прямий шлях",    geoError: "Не вдалось визначити місце",   geoTimeout: "GPS не відповів — спробуйте",    geoDenied: "Доступ до локації заборонено", satellite: "Супутник",  mapView: "Карта", caching: "Зберігаємо карту...",   cached: "Карту збережено ✓" },
   de: { locating: "Standort suchen...", routeTo: "Route nach", stop: "Stop",  direct: "Direkter Weg",   geoError: "Standort nicht ermittelbar",   geoTimeout: "GPS-Timeout — erneut versuchen", geoDenied: "Standortzugriff verweigert",   satellite: "Satellit",  mapView: "Karte", caching: "Karte wird gespeichert...", cached: "Karte gespeichert ✓" },
   es: { locating: "Buscando...",        routeTo: "Ruta a",     stop: "Parar", direct: "Camino directo", geoError: "No se pudo obtener ubicación", geoTimeout: "Tiempo de GPS agotado",          geoDenied: "Acceso a ubicación denegado",  satellite: "Satélite",  mapView: "Mapa",  caching: "Guardando mapa...",     cached: "Mapa guardado ✓" },
   pl: { locating: "Szukamy cię...",     routeTo: "Trasa do",   stop: "Stop",  direct: "Prosta trasa",   geoError: "Nie można pobrać lokalizacji", geoTimeout: "Limit czasu GPS — spróbuj ponownie", geoDenied: "Odmowa  dostępu do lokalizacji", satellite: "Satelita", mapView: "Mapa",  caching: "Zapisywanie mapy...",   cached: "Mapa zapisana ✓" },
@@ -246,26 +246,25 @@ const ZooMap = () => {
     <div className="absolute inset-0 overflow-hidden">
       <div ref={containerRef} className="absolute inset-0" />
 
-      <div className="absolute top-4 left-0 right-0 z-[1000] flex gap-2 px-4">
-        <AnimalSearch
-          onSelect={(a) => { setSelectedAnimal(a); mapRef.current?.setView([a.lat, a.lng], 18); }}
-          language={language}
-        />
+      {/* Верхня панель: КНОПКА МОВИ ТА ПОШУК ПОРЯД */}
+      <div className="absolute top-4 left-0 right-0 z-[1000] flex gap-2 px-4 items-center">
+        
+        {/* Кнопка вибору мови (Перенесено наліво, стоїть ПОРЯД з пошуком) */}
         <div ref={langMenuRef} className="relative shrink-0">
           <button
             onClick={() => setLangMenuOpen((v) => !v)}
-            className="flex h-10 items-center gap-1 rounded-xl bg-white/90 shadow-lg backdrop-blur-md px-2.5 font-bold text-gray-900"
+            className="flex h-10 items-center gap-1.5 rounded-xl bg-gradient-to-r from-gray-950 via-purple-900 via-blue-950 to-emerald-950 text-white border border-purple-500/30 shadow-2xl px-3 font-bold transition-all hover:scale-105 active:scale-95"
           >
             <span className="text-xl leading-none">{currentLang.flag}</span>
-            <ChevronDown size={14} className={`text-gray-500 transition-transform ${langMenuOpen ? "rotate-180" : ""}`} />
+            <ChevronDown size={14} className="text-purple-400 transition-transform" style={{ transform: langMenuOpen ? "rotate(180deg)" : "none" }} />
           </button>
           {langMenuOpen && (
-            <div className="absolute right-0 top-full mt-1 w-14 rounded-xl border border-gray-200 bg-white shadow-xl z-[1300] overflow-hidden flex flex-col items-center py-1">
+            <div className="absolute left-0 top-full mt-1 w-14 rounded-xl border border-purple-500/30 bg-gradient-to-b from-gray-950 via-purple-950 to-blue-950 shadow-2xl z-[1300] overflow-hidden flex flex-col items-center py-1 backdrop-blur-md">
               {LANGUAGES.map((lang) => (
                 <button
                   key={lang.code}
                   onClick={() => { setLanguage(lang.code); setLangMenuOpen(false); }}
-                  className={`flex w-full justify-center py-2 text-xl transition-colors hover:bg-gray-100 ${language === lang.code ? "bg-gray-100" : ""}`}
+                  className={`flex w-full justify-center py-2 text-xl transition-colors hover:bg-purple-900/40 ${language === lang.code ? "bg-purple-900/60" : ""}`}
                 >
                   <span className="leading-none">{lang.flag}</span>
                 </button>
@@ -273,41 +272,50 @@ const ZooMap = () => {
             </div>
           )}
         </div>
+
+        {/* Пошуковик (Справа від кнопки мови) */}
+        <div className="flex-1 bg-gradient-to-r from-gray-950 via-purple-900 via-blue-950 to-emerald-950 rounded-xl border border-purple-500/30 shadow-2xl overflow-hidden text-white backdrop-blur-sm">
+          <AnimalSearch
+            onSelect={(a) => { setSelectedAnimal(a); mapRef.current?.setView([a.lat, a.lng], 18); }}
+            language={language}
+          />
+        </div>
       </div>
 
+      {/* Бічні кнопки управління картою з градієнтним переливом */}
       <div
         className="absolute z-[1000] flex flex-col items-center gap-2"
         style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)", right: "16px" }}
       >
         <button onClick={() => mapRef.current?.zoomIn()}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-md text-gray-700 transition-transform active:scale-90">
-          <Plus size={20} strokeWidth={2.5} />
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-b from-gray-950 to-purple-950 text-white border border-purple-500/20 shadow-lg transition-transform active:scale-90">
+          <Plus size={20} strokeWidth={2.5} className="text-purple-400" />
         </button>
         <button onClick={showUserLocation}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-xl transition-transform active:scale-90">
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 text-white border border-white/20 shadow-xl transition-transform active:scale-90">
           <LocateFixed size={26} />
         </button>
         <button onClick={() => mapRef.current?.zoomOut()}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-md text-gray-700 transition-transform active:scale-90">
-          <Minus size={20} strokeWidth={2.5} />
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-b from-gray-950 to-purple-950 text-white border border-purple-500/20 shadow-lg transition-transform active:scale-90">
+          <Minus size={20} strokeWidth={2.5} className="text-purple-400" />
         </button>
         <button
           onClick={handleLayerToggle}
           disabled={caching}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-md text-gray-700 transition-transform active:scale-90 disabled:opacity-50"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-b from-gray-950 to-purple-950 text-white border border-purple-500/20 shadow-lg transition-transform active:scale-90 disabled:opacity-50"
         >
-          {mapLayer === "satellite" ? <Map size={20} strokeWidth={2} /> : <Satellite size={20} strokeWidth={2} />}
+          {mapLayer === "satellite" ? <Map size={20} strokeWidth={2} className="text-purple-400" /> : <Satellite size={20} strokeWidth={2} className="text-purple-400" />}
         </button>
       </div>
 
       {routeInfo && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-xs bg-white p-3 rounded-2xl shadow-2xl flex items-center gap-3">
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-xs bg-gradient-to-r from-gray-950 via-purple-950 to-blue-950 border border-purple-500/30 text-white p-3 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md">
           <span className="text-2xl">{routeInfo.animal.emoji}</span>
           <div className="flex-1">
             <p className="text-sm font-bold leading-tight">{getAnimalName(routeInfo.animal, language)}</p>
-            <p className="text-[10px] text-gray-500 uppercase font-semibold">{t.direct}</p>
+            <p className="text-[10px] text-purple-400 uppercase font-semibold">{t.direct}</p>
           </div>
-          <button onClick={clearRoute} className="bg-red-500 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold">{t.stop}</button>
+          <button onClick={clearRoute} className="bg-red-600 hover:bg-red-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-colors">{t.stop}</button>
         </div>
       )}
 
