@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { ANIMALS, type Animal, type Language, getAnimalName } from "@/data/animals";
+import { THEMES, type UITheme } from "./ZooMap";
 
 interface Props {
   onSelect: (animal: Animal) => void;
   language: Language;
+  uiTheme: UITheme;
 }
 
 const PLACEHOLDERS: Record<Language, string> = {
@@ -15,7 +17,8 @@ const PLACEHOLDERS: Record<Language, string> = {
   pl: "Szukaj zwierząt...",
 };
 
-const AnimalSearch = ({ onSelect, language }: Props) => {
+const AnimalSearch = ({ onSelect, language, uiTheme }: Props) => {
+  const theme = THEMES[uiTheme];
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -60,7 +63,7 @@ const AnimalSearch = ({ onSelect, language }: Props) => {
       }}
     >
       <div
-        className="flex items-center rounded-full border border-border/50 bg-background/80 shadow-md backdrop-blur-xl overflow-hidden"
+        className={`flex items-center rounded-full border shadow-md backdrop-blur-xl overflow-hidden ${theme.panel}`}
         style={{ height: 38 }}
       >
         <button
@@ -70,7 +73,7 @@ const AnimalSearch = ({ onSelect, language }: Props) => {
             setOpen(true);
             setTimeout(() => inputRef.current?.focus(), 50);
           }}
-          className="shrink-0 flex items-center justify-center text-muted-foreground"
+          className="shrink-0 flex items-center justify-center opacity-70"
           style={{ width: 38, height: 38 }}
         >
           <Search size={16} />
@@ -83,7 +86,7 @@ const AnimalSearch = ({ onSelect, language }: Props) => {
           value={query}
           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => { setFocused(true); setOpen(true); }}
-          className="flex-1 min-w-0 bg-transparent pr-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          className="flex-1 min-w-0 bg-transparent pr-2 text-sm outline-none placeholder:text-current placeholder:opacity-50"
           style={{
             height: 38,
             opacity: expanded ? 1 : 0,
@@ -95,7 +98,7 @@ const AnimalSearch = ({ onSelect, language }: Props) => {
         {query && expanded && (
           <button
             onClick={() => { setQuery(""); inputRef.current?.focus(); }}
-            className="shrink-0 rounded-full p-1 mr-2 text-muted-foreground transition-colors hover:text-foreground"
+            className="shrink-0 rounded-full p-1 mr-2 opacity-70 transition-opacity hover:opacity-100"
           >
             <X size={14} />
           </button>
@@ -103,7 +106,7 @@ const AnimalSearch = ({ onSelect, language }: Props) => {
       </div>
 
       {open && expanded && filtered.length > 0 && (
-        <div className="absolute left-0 top-full mt-1 w-full max-h-72 overflow-y-auto rounded-xl border border-border/50 bg-background/95 shadow-xl backdrop-blur-xl z-[1200]">
+        <div className={`absolute left-0 top-full mt-1 w-full max-h-72 overflow-y-auto rounded-xl border shadow-xl backdrop-blur-xl z-[1200] ${theme.panel}`}>
           {filtered.map((animal) => {
             const primaryName = getAnimalName(animal, language);
             // Secondary hint: show EN name if not already primary
@@ -118,13 +121,13 @@ const AnimalSearch = ({ onSelect, language }: Props) => {
                   setFocused(false);
                   inputRef.current?.blur();
                 }}
-                className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent/50 active:bg-accent"
+                className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/10 active:bg-white/15"
                 style={{ minHeight: 44 }}
               >
                 <span className="text-lg">{animal.emoji}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-foreground">{primaryName}</p>
-                  <p className="truncate text-xs text-muted-foreground">{secondaryName}</p>
+                  <p className="truncate font-medium">{primaryName}</p>
+                  <p className="truncate text-xs opacity-60">{secondaryName}</p>
                 </div>
               </button>
             );

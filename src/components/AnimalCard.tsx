@@ -632,7 +632,7 @@ const AnimalCard = ({ animal, language, onClose, onRoute, uiTheme }: Props) => {
 
         {/* Header: photo + name + tags */}
         <div className="flex gap-3 px-3 pt-2 pb-2">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
+          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/10">
             {wiki.thumbnail ? (
               <img src={wiki.thumbnail} alt={animal.name} className="h-full w-full object-cover" />
             ) : (
@@ -648,18 +648,18 @@ const AnimalCard = ({ animal, language, onClose, onRoute, uiTheme }: Props) => {
           <div className="flex min-w-0 flex-1 flex-col justify-center">
             <div className="flex items-start justify-between gap-1">
               <div className="min-w-0">
-                <h2 className="text-base font-semibold leading-tight text-foreground">
+                <h2 className="text-base font-semibold leading-tight">
                   {getAnimalName(animal, language)}
                 </h2>
                 {animal.scientificName && (
-                  <p className="text-[11px] italic text-muted-foreground/70 leading-tight mt-0.5">
+                  <p className="text-[11px] italic opacity-60 leading-tight mt-0.5">
                     {animal.scientificName}
                   </p>
                 )}
               </div>
               <button
                 onClick={onClose}
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-muted/80 text-muted-foreground active:scale-90 transition-all"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15 active:scale-90 transition-all"
               >
                 <X size={13} />
               </button>
@@ -667,7 +667,7 @@ const AnimalCard = ({ animal, language, onClose, onRoute, uiTheme }: Props) => {
 
             <div className="mt-1 flex flex-wrap gap-1.5 items-center">
               {dietLabel && (
-                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-foreground/75">
+                <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] opacity-90">
                   {dietLabel}
                 </span>
               )}
@@ -687,24 +687,24 @@ const AnimalCard = ({ animal, language, onClose, onRoute, uiTheme }: Props) => {
         {facts && (
           <div className="grid grid-cols-3 border-t border-border/40 mx-3">
             <div className="flex flex-col items-center py-2 border-r border-border/40">
-              <span className="text-[10px] text-muted-foreground">{ui.weight}</span>
-              <span className="text-[12px] font-medium text-foreground mt-0.5 text-center leading-tight">{facts.weight[language]}</span>
+              <span className="text-[10px] opacity-60">{ui.weight}</span>
+              <span className="text-[12px] font-medium mt-0.5 text-center leading-tight">{facts.weight[language]}</span>
             </div>
             <div className="flex flex-col items-center py-2 border-r border-border/40">
-              <span className="text-[10px] text-muted-foreground">{ui.lifespan}</span>
-              <span className="text-[12px] font-medium text-foreground mt-0.5 text-center leading-tight">{facts.lifespan[language]}</span>
+              <span className="text-[10px] opacity-60">{ui.lifespan}</span>
+              <span className="text-[12px] font-medium mt-0.5 text-center leading-tight">{facts.lifespan[language]}</span>
             </div>
             <div className="flex flex-col items-center py-2">
-              <span className="text-[10px] text-muted-foreground">{ui.region}</span>
-              <span className="text-[12px] font-medium text-foreground mt-0.5 text-center leading-tight">{facts.region[language]}</span>
+              <span className="text-[10px] opacity-60">{ui.region}</span>
+              <span className="text-[12px] font-medium mt-0.5 text-center leading-tight">{facts.region[language]}</span>
             </div>
           </div>
         )}
 
         {/* Fun fact */}
         {facts && (
-          <div className="mx-3 mt-1.5 mb-2 rounded-xl bg-muted/50 px-3 py-2">
-            <p className="text-[11px] leading-snug text-foreground/80">
+          <div className="mx-3 mt-1.5 mb-2 rounded-xl bg-white/10 px-3 py-2">
+            <p className="text-[11px] leading-snug opacity-80">
               💡 {facts.funFact[language]}
             </p>
           </div>

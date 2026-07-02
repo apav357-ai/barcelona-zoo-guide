@@ -296,6 +296,7 @@ const ZooMap = () => {
               mapRef.current?.setView([a.lat, a.lng], 18);
             }}
             language={language}
+            uiTheme={uiTheme}
           />
         </div>
 
