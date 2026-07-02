@@ -39,10 +39,10 @@ const UI_TEXTS: Record<Language, {
   satellite: string; mapView: string; caching: string; cached: string;
 }> = {
   en: { locating: "Locating...",        routeTo: "Route to",   stop: "Stop",  direct: "Direct path",    geoError: "Could not get location",      geoTimeout: "GPS timeout — try again",        geoDenied: "Location access denied",      satellite: "Satellite", mapView: "Map",   caching: "Saving map offline...", cached: "Map saved offline ✓" },
-  ua: { locating: "Шукаємо вас...",     routeTo: "Маршрут до", stop: "Стоп",  direct: "Прямий шлях",    geoError: "Не вдалось визначити місце",   geoTimeout: "GPS не відповів — спробуйте",    geoDenied: "Доступ до локації заборонено", satellite: "Супутник",  mapView: "Карта", caching: "Зберігаємо карту...",   cached: "Карту збережено ✓" },
+  ua: { locating: "Шукаємо вас...",     routeTo: "Маршрут до", stop: "Стоп",  direct: "Пнямий шлях",    geoError: "Не вдалось визначити місце",   geoTimeout: "GPS не відповів — спробуйте",    geoDenied: "Доступ до локації заборонено", satellite: "Супутник",  mapView: "Карта", caching: "Зберігаємо карту...",   cached: "Карту збережено ✓" },
   de: { locating: "Standort suchen...", routeTo: "Route nach", stop: "Stop",  direct: "Direkter Weg",   geoError: "Standort nicht ermittelbar",   geoTimeout: "GPS-Timeout — erneut versuchen", geoDenied: "Standortzugriff verweigert",   satellite: "Satellit",  mapView: "Karte", caching: "Karte wird gespeichert...", cached: "Karte gespeichert ✓" },
   es: { locating: "Buscando...",        routeTo: "Ruta a",     stop: "Parar", direct: "Camino directo", geoError: "No se pudo obtener ubicación", geoTimeout: "Tiempo de GPS agotado",          geoDenied: "Acceso a ubicación denegado",  satellite: "Satélite",  mapView: "Mapa",  caching: "Guardando mapa...",     cached: "Mapa guardado ✓" },
-  pl: { locating: "Szukamy cię...",     routeTo: "Trasa do",   stop: "Stop",  direct: "Prosta trasa",   geoError: "Nie można pobrać lokalizacji", geoTimeout: "Limit czasu GPS — spróbuj ponownie", geoDenied: "Odmowa dostępu do lokalizacji", satellite: "Satelita", mapView: "Mapa",  caching: "Zapisywanie mapy...",   cached: "Mapa zapisana ✓" },
+  pl: { locating: "Szukamy cię...",     routeTo: "Trasa do",   stop: "Stop",  direct: "Prosta trasa",   geoError: "Nie można pobrać lokalizacji", geoTimeout: "Limit czasu GPS — spróbuj ponownie", geoDenied: "Odmowa  dostępu do lokalizacji", satellite: "Satelita", mapView: "Mapa",  caching: "Zapisywanie mapy...",   cached: "Mapa zapisana ✓" },
 };
 
 const GEO_OPTIONS: PositionOptions = {
@@ -254,21 +254,20 @@ const ZooMap = () => {
         <div ref={langMenuRef} className="relative shrink-0">
           <button
             onClick={() => setLangMenuOpen((v) => !v)}
-            className="flex h-10 items-center gap-1.5 rounded-xl bg-white/90 shadow-lg backdrop-blur-md px-3 font-bold text-gray-900"
+            className="flex h-10 items-center gap-1 rounded-xl bg-white/90 shadow-lg backdrop-blur-md px-2.5 font-bold text-gray-900"
           >
-            <span className="text-lg leading-none">{currentLang.flag}</span>
+            <span className="text-xl leading-none">{currentLang.flag}</span>
             <ChevronDown size={14} className={`text-gray-500 transition-transform ${langMenuOpen ? "rotate-180" : ""}`} />
           </button>
           {langMenuOpen && (
-            <div className="absolute right-0 top-full mt-1 w-28 rounded-xl border border-gray-200 bg-white shadow-xl z-[1300] overflow-hidden">
+            <div className="absolute right-0 top-full mt-1 w-14 rounded-xl border border-gray-200 bg-white shadow-xl z-[1300] overflow-hidden flex flex-col items-center py-1">
               {LANGUAGES.map((lang) => (
                 <button
                   key={lang.code}
                   onClick={() => { setLanguage(lang.code); setLangMenuOpen(false); }}
-                  className={`flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-900 transition-colors hover:bg-gray-100 ${language === lang.code ? "bg-gray-100 font-semibold" : ""}`}
+                  className={`flex w-full justify-center py-2 text-xl transition-colors hover:bg-gray-100 ${language === lang.code ? "bg-gray-100" : ""}`}
                 >
-                  <span className="text-base leading-none">{lang.flag}</span>
-                  <span>{lang.label}</span>
+                  <span className="leading-none">{lang.flag}</span>
                 </button>
               ))}
             </div>
