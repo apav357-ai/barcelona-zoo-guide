@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import { LocateFixed, Plus, Minus, ChevronDown, Satellite, Map } from "lucide-react";
+import { LocateFixed, Plus, Minus, ChevronDown, Satellite, Map, Palette } from "lucide-react";
 import { toast } from "sonner";
 import AnimalCard from "./AnimalCard";
 import AnimalSearch from "./AnimalSearch";
@@ -41,7 +41,7 @@ const UI_TEXTS: Record<Language, {
   en: { locating: "Locating...",        routeTo: "Route to",   stop: "Stop",  direct: "Direct path",    geoError: "Could not get location",      geoTimeout: "GPS timeout — try again",        geoDenied: "Location access denied",      satellite: "Satellite", mapView: "Map",   caching: "Saving map offline...", cached: "Map saved offline ✓" },
   ua: { locating: "Шукаємо вас...",     routeTo: "Маршрут до", stop: "Стоп",  direct: "Прямий шлях",    geoError: "Не вдалось визначити місце",   geoTimeout: "GPS не відповів — спробуйте",    geoDenied: "Доступ до локації заборонено", satellite: "Супутник",  mapView: "Карта", caching: "Зберігаємо карту...",   cached: "Карту збережено ✓" },
   de: { locating: "Standort suchen...", routeTo: "Route nach", stop: "Stop",  direct: "Direkter Weg",   geoError: "Standort nicht ermittelbar",   geoTimeout: "GPS-Timeout — erneut versuchen", geoDenied: "Standortzugriff verweigert",   satellite: "Satellit",  mapView: "Karte", caching: "Karte wird gespeichert...", cached: "Karte gespeichert ✓" },
-  es: { locating: "Buscando...",        routeTo: "Ruta a",     stop: "Parar", direct: "Camino directo", geoError: "No se pudo obtener ubicación", geoTimeout: "Tiempo de GPS agotado",          geoDenied: "Acceso a ubicación denegado",  satellite: "Satélite",  mapView: "Mapa",  caching: "Guardando mapa...",     cached: "Mapa guardado ✓" },
+  es: { locating: "Buscando...",        routeTo: "Ruta a",     stop: "Parar", direct: "Camino directo", geoError: "No se pudo obtener ubicación", geoTimeout: "Tiempo de GPS agotado",          geoDenied: "Acceso a ubicación denegado",  satellite: "Satélite",  mapView: "Mapa",  caching: "Guardando map...",      cached: "Mapa guardado ✓" },
   pl: { locating: "Szukamy cię...",     routeTo: "Trasa do",   stop: "Stop",  direct: "Prosta trasa",   geoError: "Nie można pobrać lokalizacji", geoTimeout: "Limit czasu GPS — spróbuj ponownie", geoDenied: "Odmowa  dostępu do lokalizacji", satellite: "Satelita", mapView: "Mapa",  caching: "Zapisywanie mapy...",   cached: "Mapa zapisana ✓" },
 };
 
@@ -93,6 +93,7 @@ async function precacheOSMTiles(onProgress?: (pct: number) => void) {
 }
 
 type MapLayer = "satellite" | "osm";
+type UITheme = "dark" | "gradient";
 
 const ZooMap = () => {
   const [language, setLanguage]         = useState<Language>("en");
@@ -102,6 +103,9 @@ const ZooMap = () => {
   const [mapLayer, setMapLayer]         = useState<MapLayer>("satellite");
   const [osmCached, setOsmCached]       = useState(false);
   const [caching, setCaching]           = useState(false);
+  
+  // Стан для перемикання теми інтерфейсу
+  const [uiTheme, setUiTheme]           = useState<UITheme>("dark");
 
   const containerRef      = useRef<HTMLDivElement>(null);
   const mapRef            = useRef<L.Map | null>(null);
@@ -113,6 +117,15 @@ const ZooMap = () => {
 
   const t = UI_TEXTS[language];
   const currentLang = LANGUAGES.find((l) => l.code === language)!;
+
+  // Динамічні класи стилів залежно від вибраної теми
+  const themeClasses = uiTheme === "gradient" 
+    ? "bg-gradient-to-r from-gray-950 via-purple-900 via-blue-950 to-emerald-950 text-white border-purple-500/40"
+    : "bg-slate-900/95 text-white border-slate-700/50";
+
+  const btnThemeClasses = uiTheme === "gradient"
+    ? "bg-gradient-to-b from-gray-900 to-purple-950 text-white border-purple-500/30"
+    : "bg-slate-900/90 text-white border-slate-700/60";
 
   useEffect(() => {
     if ("caches" in window) caches.has(OSM_CACHE_NAME).then(setOsmCached);
@@ -246,25 +259,26 @@ const ZooMap = () => {
     <div className="absolute inset-0 overflow-hidden">
       <div ref={containerRef} className="absolute inset-0" />
 
-      {/* Верхня панель: КНОПКА МОВИ ТА ПОШУК ПОРЯД */}
+      {/* Верхня панель: Кнопка мови ліворуч, Пошук поруч */}
       <div className="absolute top-4 left-0 right-0 z-[1000] flex gap-2 px-4 items-center">
         
-        {/* Кнопка вибору мови (Перенесено наліво, стоїть ПОРЯД з пошуком) */}
+        {/* Вибір мови */}
         <div ref={langMenuRef} className="relative shrink-0">
           <button
             onClick={() => setLangMenuOpen((v) => !v)}
-            className="flex h-10 items-center gap-1.5 rounded-xl bg-gradient-to-r from-gray-950 via-purple-900 via-blue-950 to-emerald-950 text-white border border-purple-500/30 shadow-2xl px-3 font-bold transition-all hover:scale-105 active:scale-95"
+            className={`flex h-10 items-center gap-1.5 rounded-xl border shadow-lg px-3 font-bold backdrop-blur-md transition-all hover:scale-105 active:scale-95 ${themeClasses}`}
           >
             <span className="text-xl leading-none">{currentLang.flag}</span>
-            <ChevronDown size={14} className="text-purple-400 transition-transform" style={{ transform: langMenuOpen ? "rotate(180deg)" : "none" }} />
+            <ChevronDown size={14} className="transition-transform opacity-70" style={{ transform: langMenuOpen ? "rotate(180deg)" : "none" }} />
           </button>
+          
           {langMenuOpen && (
-            <div className="absolute left-0 top-full mt-1 w-14 rounded-xl border border-purple-500/30 bg-gradient-to-b from-gray-950 via-purple-950 to-blue-950 shadow-2xl z-[1300] overflow-hidden flex flex-col items-center py-1 backdrop-blur-md">
+            <div className={`absolute left-0 top-full mt-1 w-14 rounded-xl border shadow-xl z-[1300] overflow-hidden flex flex-col items-center py-1 backdrop-blur-md ${themeClasses}`}>
               {LANGUAGES.map((lang) => (
                 <button
                   key={lang.code}
                   onClick={() => { setLanguage(lang.code); setLangMenuOpen(false); }}
-                  className={`flex w-full justify-center py-2 text-xl transition-colors hover:bg-purple-900/40 ${language === lang.code ? "bg-purple-900/60" : ""}`}
+                  className={`flex w-full justify-center py-2 text-xl transition-colors ${language === lang.code ? "bg-white/20" : "hover:bg-white/10"}`}
                 >
                   <span className="leading-none">{lang.flag}</span>
                 </button>
@@ -273,8 +287,8 @@ const ZooMap = () => {
           )}
         </div>
 
-        {/* Пошуковик (Справа від кнопки мови) */}
-        <div className="flex-1 bg-gradient-to-r from-gray-950 via-purple-900 via-blue-950 to-emerald-950 rounded-xl border border-purple-500/30 shadow-2xl overflow-hidden text-white backdrop-blur-sm">
+        {/* Пошук */}
+        <div className={`flex-1 rounded-xl border shadow-lg overflow-hidden backdrop-blur-md ${themeClasses}`}>
           <AnimalSearch
             onSelect={(a) => { setSelectedAnimal(a); mapRef.current?.setView([a.lat, a.lng], 18); }}
             language={language}
@@ -282,38 +296,50 @@ const ZooMap = () => {
         </div>
       </div>
 
-      {/* Бічні кнопки управління картою з градієнтним переливом */}
+      {/* Бічні кнопки управління картою */}
       <div
         className="absolute z-[1000] flex flex-col items-center gap-2"
         style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)", right: "16px" }}
       >
-        <button onClick={() => mapRef.current?.zoomIn()}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-b from-gray-950 to-purple-950 text-white border border-purple-500/20 shadow-lg transition-transform active:scale-90">
-          <Plus size={20} strokeWidth={2.5} className="text-purple-400" />
+        {/* Кнопка зміни теми інтерфейсу (Фарбує або скидає кольори) */}
+        <button 
+          onClick={() => setUiTheme(prev => prev === "dark" ? "gradient" : "dark")}
+          className={`flex h-11 w-11 items-center justify-center rounded-full border shadow-lg backdrop-blur-md transition-transform active:scale-90 ${btnThemeClasses}`}
+          title="Змінити тему"
+        >
+          <Palette size={20} className={uiTheme === "gradient" ? "text-emerald-400" : "text-blue-400"} />
         </button>
+
+        <button onClick={() => mapRef.current?.zoomIn()}
+          className={`flex h-11 w-11 items-center justify-center rounded-full border shadow-lg backdrop-blur-md transition-transform active:scale-90 ${btnThemeClasses}`}>
+          <Plus size={20} strokeWidth={2.5} />
+        </button>
+        
         <button onClick={showUserLocation}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 text-white border border-white/20 shadow-xl transition-transform active:scale-90">
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-xl transition-transform active:scale-90 border border-white/20">
           <LocateFixed size={26} />
         </button>
+        
         <button onClick={() => mapRef.current?.zoomOut()}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-b from-gray-950 to-purple-950 text-white border border-purple-500/20 shadow-lg transition-transform active:scale-90">
-          <Minus size={20} strokeWidth={2.5} className="text-purple-400" />
+          className={`flex h-11 w-11 items-center justify-center rounded-full border shadow-lg backdrop-blur-md transition-transform active:scale-90 ${btnThemeClasses}`}>
+          <Minus size={20} strokeWidth={2.5} />
         </button>
+        
         <button
           onClick={handleLayerToggle}
           disabled={caching}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-b from-gray-950 to-purple-950 text-white border border-purple-500/20 shadow-lg transition-transform active:scale-90 disabled:opacity-50"
+          className={`flex h-11 w-11 items-center justify-center rounded-full border shadow-lg backdrop-blur-md transition-transform active:scale-90 disabled:opacity-50 ${btnThemeClasses}`}
         >
-          {mapLayer === "satellite" ? <Map size={20} strokeWidth={2} className="text-purple-400" /> : <Satellite size={20} strokeWidth={2} className="text-purple-400" />}
+          {mapLayer === "satellite" ? <Map size={20} strokeWidth={2} /> : <Satellite size={20} strokeWidth={2} />}
         </button>
       </div>
 
       {routeInfo && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-xs bg-gradient-to-r from-gray-950 via-purple-950 to-blue-950 border border-purple-500/30 text-white p-3 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md">
+        <div className={`absolute top-20 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-xs border p-3 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md ${themeClasses}`}>
           <span className="text-2xl">{routeInfo.animal.emoji}</span>
           <div className="flex-1">
             <p className="text-sm font-bold leading-tight">{getAnimalName(routeInfo.animal, language)}</p>
-            <p className="text-[10px] text-purple-400 uppercase font-semibold">{t.direct}</p>
+            <p className="text-[10px] opacity-70 uppercase font-semibold">{t.direct}</p>
           </div>
           <button onClick={clearRoute} className="bg-red-600 hover:bg-red-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-colors">{t.stop}</button>
         </div>
