@@ -13,13 +13,10 @@ import { ANIMALS, type Animal, type Language, getAnimalName } from "@/data/anima
 const ZOO_CENTER: [number, number] = [41.387, 2.189];
 const ZOO_DEFAULT_ZOOM = 17;
 
-// ─── Barcelona bounds — карта не вийде за ці межі ────────────────────────────
 const BARCELONA_BOUNDS: L.LatLngBoundsExpression = [
-  [41.32, 2.08], // SW
-  [41.47, 2.29], // NE
+  [41.32, 2.08],
+  [41.47, 2.29],
 ];
-
-// ─── User location dot marker ─────────────────────────────────────────────────
 
 const USER_LOCATION_ICON = L.divIcon({
   className: "user-location-dot",
@@ -27,8 +24,6 @@ const USER_LOCATION_ICON = L.divIcon({
   iconSize: [20, 20],
   iconAnchor: [10, 10],
 });
-
-// ─── Language config ──────────────────────────────────────────────────────────
 
 const LANGUAGES: { code: Language; flag: string; label: string }[] = [
   { code: "en", flag: "🇬🇧", label: "EN" },
@@ -160,7 +155,6 @@ const ZooMap = () => {
         if (!mapRef.current) return;
         if (userMarkerRef.current) mapRef.current.removeLayer(userMarkerRef.current);
         userMarkerRef.current = L.marker([lat, lng], { icon: USER_LOCATION_ICON }).addTo(mapRef.current);
-        // ✅ Центруємо тільки якщо користувач в межах Барселони
         const bounds = L.latLngBounds(BARCELONA_BOUNDS);
         if (bounds.contains([lat, lng])) {
           mapRef.current.setView([lat, lng], 18);
@@ -215,10 +209,9 @@ const ZooMap = () => {
       zoom: ZOO_DEFAULT_ZOOM,
       zoomControl: false,
       preferCanvas: false,
-      // ✅ Карта не виходить за межі Барселони
       maxBounds: BARCELONA_BOUNDS,
-      maxBoundsViscosity: 1.0, // тверда межа
-      minZoom: 13,             // не можна відзумити далі Барселони
+      maxBoundsViscosity: 1.0,
+      minZoom: 13,
     });
     mapRef.current = map;
 
@@ -261,11 +254,10 @@ const ZooMap = () => {
         <div ref={langMenuRef} className="relative shrink-0">
           <button
             onClick={() => setLangMenuOpen((v) => !v)}
-            className="flex h-10 items-center gap-1 rounded-xl bg-white/90 shadow-lg backdrop-blur-md px-2.5 font-bold text-xs uppercase text-gray-900"
+            className="flex h-10 items-center gap-1.5 rounded-xl bg-white/90 shadow-lg backdrop-blur-md px-3 font-bold text-gray-900"
           >
-            <span>{currentLang.flag}</span>
-            <span>{currentLang.label}</span>
-            <ChevronDown size={12} className={`transition-transform ${langMenuOpen ? "rotate-180" : ""}`} />
+            <span className="text-lg leading-none">{currentLang.flag}</span>
+            <ChevronDown size={14} className={`text-gray-500 transition-transform ${langMenuOpen ? "rotate-180" : ""}`} />
           </button>
           {langMenuOpen && (
             <div className="absolute right-0 top-full mt-1 w-28 rounded-xl border border-gray-200 bg-white shadow-xl z-[1300] overflow-hidden">
@@ -275,7 +267,7 @@ const ZooMap = () => {
                   onClick={() => { setLanguage(lang.code); setLangMenuOpen(false); }}
                   className={`flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-900 transition-colors hover:bg-gray-100 ${language === lang.code ? "bg-gray-100 font-semibold" : ""}`}
                 >
-                  <span>{lang.flag}</span>
+                  <span className="text-base leading-none">{lang.flag}</span>
                   <span>{lang.label}</span>
                 </button>
               ))}
