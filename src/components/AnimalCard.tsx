@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { X, Navigation } from "lucide-react";
 import type { Animal } from "@/data/animals";
 import { type Language, getAnimalName } from "@/data/animals";
+import { THEMES, type UITheme } from "./ZooMap";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -10,6 +11,7 @@ interface Props {
   language: Language;
   onClose: () => void;
   onRoute: (animal: Animal) => void;
+  uiTheme: UITheme;
 }
 
 // ─── Conservation status ─────────────────────────────────────────────────────
@@ -589,10 +591,11 @@ const fetchWikiPhoto = async (title: string): Promise<WikiData> => {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-const AnimalCard = ({ animal, language, onClose, onRoute }: Props) => {
+const AnimalCard = ({ animal, language, onClose, onRoute, uiTheme }: Props) => {
   const [wiki, setWiki] = useState<WikiData>({});
   const [loading, setLoading] = useState(true);
 
+  const theme = THEMES[uiTheme];
   const conservation = animal.conservation ? CONSERVATION_LABELS[animal.conservation]?.[language] : null;
   const facts = ANIMAL_FACTS[animal.id];
   const ui = UI[language];
@@ -620,7 +623,7 @@ const AnimalCard = ({ animal, language, onClose, onRoute }: Props) => {
       className="absolute bottom-0 left-0 right-0 z-[1200] animate-in slide-in-from-bottom duration-300 pointer-events-none"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      <div className="mx-3 mb-3 flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-background/95 shadow-2xl backdrop-blur-xl pointer-events-auto sm:mx-4 sm:mb-4">
+      <div className={`mx-3 mb-3 flex flex-col overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl pointer-events-auto sm:mx-4 sm:mb-4 ${theme.panel}`}>
 
         {/* Drag handle */}
         <div className="flex justify-center pt-2">

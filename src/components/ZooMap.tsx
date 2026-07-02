@@ -41,7 +41,7 @@ const UI_TEXTS: Record<Language, {
   en: { locating: "Locating...",        routeTo: "Route to",   stop: "Stop",  direct: "Direct path",    geoError: "Could not get location",      geoTimeout: "GPS timeout — try again",        geoDenied: "Location access denied",      satellite: "Satellite", mapView: "Map",   caching: "Saving map offline...", cached: "Map saved offline ✓" },
   ua: { locating: "Шукаємо вас...",     routeTo: "Маршрут до", stop: "Стоп",  direct: "Прямий шлях",    geoError: "Не вдалось визначити місце",   geoTimeout: "GPS не відповів — спробуйте",    geoDenied: "Доступ до локації заборонено", satellite: "Супутник",  mapView: "Карта", caching: "Зберігаємо карту...",   cached: "Карту збережено ✓" },
   de: { locating: "Standort suchen...", routeTo: "Route nach", stop: "Stop",  direct: "Direkter Weg",   geoError: "Standort nicht ermittelbar",   geoTimeout: "GPS-Timeout — erneut versuchen", geoDenied: "Standortzugriff verweigert",   satellite: "Satellit",  mapView: "Karte", caching: "Karte wird gespeichert...", cached: "Karte gespeichert ✓" },
-  es: { locating: "Buscando...",        routeTo: "Ruta a",     stop: "Parar", direct: "Camino directo", geoError: "No se pudo obtener ubicación", geoTimeout: "Tiempo de GPS agotado",          geoDenied: "Acceso a relocation denegado", satellite: "Satélite",  mapView: "Mapa",  caching: "Guardando map...",      cached: "Mapa guardado ✓" },
+  es: { locating: "Buscando...",        routeTo: "Ruta a",     stop: "Parar", direct: "Camino directo", geoError: "No se pudo obtainer ubicación", geoTimeout: "Tiempo de GPS agotado",          geoDenied: "Acceso a relocation denegado", satellite: "Satélite",  mapView: "Mapa",  caching: "Guardando map...",      cached: "Mapa guardado ✓" },
   pl: { locating: "Szukamy cię...",     routeTo: "Trasa do",   stop: "Stop",  direct: "Prosta trasa",   geoError: "Nie można pobrać lokalizacji", geoTimeout: "Limit czasu GPS — spróbuj ponownie", geoDenied: "Odmowa dostępu do lokalizacji", satellite: "Satelita", mapView: "Mapa",  caching: "Zapisywanie mapy...",   cached: "Mapa zapisana ✓" },
 };
 
@@ -92,8 +92,7 @@ async function precacheOSMTiles(onProgress?: (pct: number) => void) {
   }
 }
 
-type MapLayer = "satellite" | "osm";
-type UITheme = "dark" | "gradient" | "emerald" | "amber";
+export type UITheme = "dark" | "gradient" | "emerald" | "amber";
 
 interface ThemeConfig {
   name: string;
@@ -102,7 +101,7 @@ interface ThemeConfig {
   iconColor: string;
 }
 
-const THEMES: Record<UITheme, ThemeConfig> = {
+export const THEMES: Record<UITheme, ThemeConfig> = {
   dark: {
     name: "Classic Dark",
     panel: "bg-slate-900/95 text-white border-slate-700/50",
@@ -135,7 +134,9 @@ const ZooMap = () => {
   const [paletteMenuOpen, setPaletteMenuOpen] = useState(false);
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
   const [routeInfo, setRouteInfo]       = useState<{ animal: Animal } | null>(null);
-  const [mapLayer, setMapLayer]         = useState<MapLayer>("satellite");
+  
+  // Замінили тип на літерал, щоб прибрати підкреслення у VS Code
+  const [mapLayer, setMapLayer]         = useState<"satellite" | "osm">("satellite");
   const [osmCached, setOsmCached]       = useState(false);
   const [caching, setCaching]           = useState(false);
   const [uiTheme, setUiTheme]           = useState<UITheme>("dark");
@@ -157,7 +158,6 @@ const ZooMap = () => {
     if ("caches" in window) caches.has(OSM_CACHE_NAME).then(setOsmCached);
   }, []);
 
-  // Global click handler to close open dropdown menus when clicking on the map
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       const target = e.target as Node;
@@ -231,7 +231,7 @@ const ZooMap = () => {
   }, [clearRoute, t, language]);
 
   const handleLayerToggle = useCallback(async () => {
-    const next: MapLayer = mapLayer === "satellite" ? "osm" : "satellite";
+    const next: "satellite" | "osm" = mapLayer === "satellite" ? "osm" : "satellite";
     setMapLayer(next);
     if (next === "osm" && !osmCached && !caching) {
       setCaching(true);
@@ -287,10 +287,8 @@ const ZooMap = () => {
     <div className="absolute inset-0 overflow-hidden">
       <div ref={containerRef} className="absolute inset-0" />
 
-      {/* Top Bar Controls: Animal Search on Left ---------- Theme & Language Dropdowns on Right */}
+      {/* Top Bar Controls */}
       <div className="absolute top-4 left-4 right-4 z-[1000] flex justify-between items-start pointer-events-none">
-        
-        {/* LEFT SIDE: Clean native expandable search input component */}
         <div className="pointer-events-auto">
           <AnimalSearch
             onSelect={(a) => {
@@ -301,10 +299,8 @@ const ZooMap = () => {
           />
         </div>
 
-        {/* RIGHT SIDE: Action settings control layout */}
         <div className="flex gap-2 items-center pointer-events-auto">
-          
-          {/* Theme selection panel (Palette popup container) */}
+          {/* Theme selection panel */}
           <div ref={paletteMenuRef} className="relative">
             <button 
               onClick={() => setPaletteMenuOpen((v) => !v)}
@@ -330,7 +326,7 @@ const ZooMap = () => {
             )}
           </div>
 
-          {/* Language selection toggle block */}
+          {/* Language selection */}
           <div ref={langMenuRef} className="relative shrink-0">
             <button
               onClick={() => setLangMenuOpen((v) => !v)}
@@ -354,11 +350,10 @@ const ZooMap = () => {
               </div>
             )}
           </div>
-
         </div>
       </div>
 
-      {/* Map Action Utility Navigation Buttons (Bottom Right) */}
+      {/* Map Actions Navigation Controls */}
       <div
         className="absolute z-[1000] flex flex-col items-center gap-2"
         style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)", right: "16px" }}
@@ -387,7 +382,7 @@ const ZooMap = () => {
         </button>
       </div>
 
-      {/* Target Route Information Display Overlay Banner */}
+      {/* Route Info Banner */}
       {routeInfo && (
         <div className={`absolute top-20 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-xs border p-3 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md ${currentTheme.panel}`}>
           <span className="text-2xl">{routeInfo.animal.emoji}</span>
@@ -405,6 +400,7 @@ const ZooMap = () => {
           language={language}
           onClose={() => setSelectedAnimal(null)}
           onRoute={(a) => buildRoute(a)}
+          uiTheme={uiTheme} // <-- Передаємо сюди, а в самій картці ми це зараз приймемо!
         />
       )}
     </div>
