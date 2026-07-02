@@ -42,7 +42,7 @@ const UI_TEXTS: Record<Language, {
   ua: { locating: "Шукаємо вас...",     routeTo: "Маршрут до", stop: "Стоп",  direct: "Прямий шлях",    geoError: "Не вдалось визначити місце",   geoTimeout: "GPS не відповів — спробуйте",    geoDenied: "Доступ до локації заборонено", satellite: "Супутник",  mapView: "Карта", caching: "Зберігаємо карту...",   cached: "Карту збережено ✓" },
   de: { locating: "Standort suchen...", routeTo: "Route nach", stop: "Stop",  direct: "Direkter Weg",   geoError: "Standort nicht ermittelbar",   geoTimeout: "GPS-Timeout — erneut versuchen", geoDenied: "Standortzugriff verweigert",   satellite: "Satellit",  mapView: "Karte", caching: "Karte wird gespeichert...", cached: "Karte gespeichert ✓" },
   es: { locating: "Buscando...",        routeTo: "Ruta a",     stop: "Parar", direct: "Camino directo", geoError: "No se pudo obtener ubicación", geoTimeout: "Tiempo de GPS agotado",          geoDenied: "Acceso a ubicación denegado",  satellite: "Satélite",  mapView: "Mapa",  caching: "Guardando map...",      cached: "Mapa guardado ✓" },
-  pl: { locating: "Szukamy cię...",     routeTo: "Trasa do",   stop: "Stop",  direct: "Prosta trasa",   geoError: "Nie można pobrać lokalizacji", geoTimeout: "Limit czasu GPS — spróbuj ponownie", geoDenied: "Odmowa  dostępu do lokalizacji", satellite: "Satelita", mapView: "Mapa",  caching: "Zapisywanie mapy...",   cached: "Mapa zapisana ✓" },
+  pl: { locating: "Szukamy cię...",     routeTo: "Trasa do",   stop: "Stop",  direct: "Prosta trasa",   geoError: "Nie можна pobrać lokalizacji", geoTimeout: "Limit czasu GPS — spróbuj ponownie", geoDenied: "Odmowa  dostępu do lokalizacji", satellite: "Satelita", mapView: "Mapa",  caching: "Zapisywanie mapy...",   cached: "Mapa zapisana ✓" },
 };
 
 const GEO_OPTIONS: PositionOptions = {
@@ -104,7 +104,6 @@ const ZooMap = () => {
   const [osmCached, setOsmCached]       = useState(false);
   const [caching, setCaching]           = useState(false);
   
-  // Стан для перемикання теми інтерфейсу
   const [uiTheme, setUiTheme]           = useState<UITheme>("dark");
 
   const containerRef      = useRef<HTMLDivElement>(null);
@@ -118,7 +117,6 @@ const ZooMap = () => {
   const t = UI_TEXTS[language];
   const currentLang = LANGUAGES.find((l) => l.code === language)!;
 
-  // Динамічні класи стилів залежно від вибраної теми
   const themeClasses = uiTheme === "gradient" 
     ? "bg-gradient-to-r from-gray-950 via-purple-900 via-blue-950 to-emerald-950 text-white border-purple-500/40"
     : "bg-slate-900/95 text-white border-slate-700/50";
@@ -259,57 +257,62 @@ const ZooMap = () => {
     <div className="absolute inset-0 overflow-hidden">
       <div ref={containerRef} className="absolute inset-0" />
 
-      {/* Верхня панель: Кнопка мови ліворуч, Пошук поруч */}
-      <div className="absolute top-4 left-0 right-0 z-[1000] flex gap-2 px-4 items-center">
+      {/* Верхня панель: Пошук зліва ---------- Кнопки палітри та мови справа */}
+      <div className="absolute top-4 left-4 right-4 z-[1000] flex justify-between items-center pointer-events-none">
         
-        {/* Вибір мови */}
-        <div ref={langMenuRef} className="relative shrink-0">
-          <button
-            onClick={() => setLangMenuOpen((v) => !v)}
-            className={`flex h-10 items-center gap-1.5 rounded-xl border shadow-lg px-3 font-bold backdrop-blur-md transition-all hover:scale-105 active:scale-95 ${themeClasses}`}
-          >
-            <span className="text-xl leading-none">{currentLang.flag}</span>
-            <ChevronDown size={14} className="transition-transform opacity-70" style={{ transform: langMenuOpen ? "rotate(180deg)" : "none" }} />
-          </button>
-          
-          {langMenuOpen && (
-            <div className={`absolute left-0 top-full mt-1 w-14 rounded-xl border shadow-xl z-[1300] overflow-hidden flex flex-col items-center py-1 backdrop-blur-md ${themeClasses}`}>
-              {LANGUAGES.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => { setLanguage(lang.code); setLangMenuOpen(false); }}
-                  className={`flex w-full justify-center py-2 text-xl transition-colors ${language === lang.code ? "bg-white/20" : "hover:bg-white/10"}`}
-                >
-                  <span className="leading-none">{lang.flag}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Пошук */}
-        <div className={`flex-1 rounded-xl border shadow-lg overflow-hidden backdrop-blur-md ${themeClasses}`}>
+        {/* ЛІВА СТОРОНА: Компактний пошук */}
+        <div className={`w-64 rounded-xl border shadow-lg overflow-hidden backdrop-blur-md pointer-events-auto ${themeClasses}`}>
           <AnimalSearch
             onSelect={(a) => { setSelectedAnimal(a); mapRef.current?.setView([a.lat, a.lng], 18); }}
             language={language}
           />
         </div>
+
+        {/* ПРАВА СТОРОНА: Кнопки налаштувань */}
+        <div className="flex gap-2 items-center pointer-events-auto">
+          
+          {/* Кнопка зміни кольору (Палітра) */}
+          <button 
+            onClick={() => setUiTheme(prev => prev === "dark" ? "gradient" : "dark")}
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border shadow-lg backdrop-blur-md transition-all hover:scale-105 active:scale-95 ${themeClasses}`}
+            title="Змінити тему"
+          >
+            <Palette size={18} className={uiTheme === "gradient" ? "text-emerald-400" : "text-blue-400"} />
+          </button>
+
+          {/* Вибір мови */}
+          <div ref={langMenuRef} className="relative shrink-0">
+            <button
+              onClick={() => setLangMenuOpen((v) => !v)}
+              className={`flex h-10 items-center gap-1.5 rounded-xl border shadow-lg px-3 font-bold backdrop-blur-md transition-all hover:scale-105 active:scale-95 ${themeClasses}`}
+            >
+              <span className="text-xl leading-none">{currentLang.flag}</span>
+              <ChevronDown size={14} className="transition-transform opacity-70" style={{ transform: langMenuOpen ? "rotate(180deg)" : "none" }} />
+            </button>
+            
+            {langMenuOpen && (
+              <div className={`absolute right-0 top-full mt-1 w-14 rounded-xl border shadow-xl z-[1300] overflow-hidden flex flex-col items-center py-1 backdrop-blur-md ${themeClasses}`}>
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => { setLanguage(lang.code); setLangMenuOpen(false); }}
+                    className={`flex w-full justify-center py-2 text-xl transition-colors ${language === lang.code ? "bg-white/20" : "hover:bg-white/10"}`}
+                  >
+                    <span className="leading-none">{lang.flag}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+        </div>
       </div>
 
-      {/* Бічні кнопки управління картою */}
+      {/* Бічні кнопки управління картою (праворуч внизу) */}
       <div
         className="absolute z-[1000] flex flex-col items-center gap-2"
         style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)", right: "16px" }}
       >
-        {/* Кнопка зміни теми інтерфейсу (Фарбує або скидає кольори) */}
-        <button 
-          onClick={() => setUiTheme(prev => prev === "dark" ? "gradient" : "dark")}
-          className={`flex h-11 w-11 items-center justify-center rounded-full border shadow-lg backdrop-blur-md transition-transform active:scale-90 ${btnThemeClasses}`}
-          title="Змінити тему"
-        >
-          <Palette size={20} className={uiTheme === "gradient" ? "text-emerald-400" : "text-blue-400"} />
-        </button>
-
         <button onClick={() => mapRef.current?.zoomIn()}
           className={`flex h-11 w-11 items-center justify-center rounded-full border shadow-lg backdrop-blur-md transition-transform active:scale-90 ${btnThemeClasses}`}>
           <Plus size={20} strokeWidth={2.5} />
@@ -334,6 +337,7 @@ const ZooMap = () => {
         </button>
       </div>
 
+      {/* Плашка маршруту */}
       {routeInfo && (
         <div className={`absolute top-20 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-xs border p-3 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md ${themeClasses}`}>
           <span className="text-2xl">{routeInfo.animal.emoji}</span>
